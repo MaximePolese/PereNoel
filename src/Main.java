@@ -50,7 +50,7 @@ public class Main {
         double Δλ = (lon2 - lon1) * Math.PI / 180;
         double a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double d = (double) Math.round(R * c) / 1000; // in km
+        double d = R * c / 1000; // in km
         return d;
     }
 
@@ -72,7 +72,6 @@ public class Main {
 
     public static ArrayList<Integer> path = new ArrayList<>(allPoints.length);
     public static boolean[] visited = new boolean[allPoints.length];
-    public static double distanceTotale = 0;
 
     public static int findNextMove(int lastPoint) {
         double shortestWay = 1000;
@@ -86,23 +85,92 @@ public class Main {
             }
         }
         visited[lastPoint] = true;
-        distanceTotale = distanceTotale + shortestWay;
         System.out.println(shortestWay);
-        path.add(nextIndex + 1);
+        path.add(nextIndex);
         System.out.println(path);
         return nextIndex;
     }
 
     public static void findShortestPath(int startPoint) {
-        int nextPoint = startPoint - 1;
+        path.add(startPoint);
+        int nextPoint = startPoint;
         for (int i = 0; i < (allPoints.length - 1); i++) {
             nextPoint = findNextMove(nextPoint);
         }
-        System.out.println(distanceTotale);
+    }
+
+    public static double calcTotalkm(ArrayList<Integer> chmin) {
+        double tot = 0;
+        for (int i = 0; i < chmin.size() - 1; i++) {
+            tot += calcDistance(chmin.get(i), chmin.get(i + 1));
+        }
+        return tot;
+    }
+
+    public static double[][] pheromone = new double[allPoints.length][allPoints.length];
+
+    public static void initPhero() {
+        for (int i = 0; i < allPoints.length; i++) {
+            for (int j = 0; j < allPoints[i].length; j++) {
+                pheromone[i][j] = 0;
+            }
+        }
+    }
+
+    public static void fillPhero() {
+        for (int i = 0; i < allPoints.length; i++) {
+            findShortestPath(i);
+            for (int j = 0; j < (path.size() - 1); j++) {
+                pheromone[path.get(j)][path.get(j + 1)] += 1;
+            }
+            path.clear();
+            clearVisited();
+        }
+    }
+
+    private static void clearVisited() {
+        for (int i = 0; i < visited.length; i++) {
+            visited[i] = false;
+        }
+    }
+
+    public static boolean[] visitedPhero = new boolean[allPoints.length];
+
+    public static double getPheroOnRoad(int pointA, int pointB) {
+        return pheromone[pointA][pointB] + pheromone[pointB][pointA];
+    }
+
+    public static int findNextAntMove(int lastPoint) {
+        double pheroMax = 0;
+        int nextIndex = 1000;
+        for (int i = 0; i < allPoints.length; i++) {
+            if (!visitedPhero[i]) {
+                if (getPheroOnRoad(lastPoint, i) >= pheroMax) {
+                    pheroMax = getPheroOnRoad(lastPoint, i);
+                    nextIndex = i;
+                }
+            }
+        }
+        visitedPhero[lastPoint] = true;
+        path.add(nextIndex);
+        System.out.println(path);
+        return nextIndex;
+    }
+
+    public static void findShortestAntPath(int startPoint) {
+        initPhero();
+        fillPhero();
+        path.add(startPoint);
+        int nextPoint = startPoint;
+        for (int i = 0; i < (allPoints.length - 1); i++) {
+            nextPoint = findNextAntMove(nextPoint);
+        }
     }
 
     public static void main(String[] args) {
         calcAllDistances();
-        findShortestPath(1);
+//        findShortestPath(0);
+        findShortestAntPath(0);
+        System.out.println(calcTotalkm(path));
     }
 }
