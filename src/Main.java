@@ -76,7 +76,7 @@ public class Main {
 
     public static int findNextMove(int lastPoint) {
         double shortestWay = 1000;
-        int nextIndex = 100;
+        int nextIndex = 1000;
         for (int i = 0; i < allPoints.length; i++) {
             if (distances[lastPoint][i] > 0 && !visited[i]) {
                 if (distances[lastPoint][i] < shortestWay) {
@@ -101,38 +101,8 @@ public class Main {
         System.out.println(distanceTotale);
     }
 
-    public static ArrayList<Double> dijkstraPath = new ArrayList<>(allPoints.length);
-    public static double distanceDijkstra = 0;
-
-    public static int findNextMoveDijkstra(int lastPoint) {
-        double shortestWay = 1000;
-        int nextIndex = 100;
-        for (int i = 0; i < allPoints.length; i++) {
-            if (distances[lastPoint][i] > 0 && !visited[i]) {
-                if (distances[lastPoint][i] < shortestWay) {
-                    shortestWay = distances[lastPoint][i];
-                    nextIndex = i;
-                    dijkstraPath.add(distances[lastPoint][i]);
-                }
-            }
-        }
-        visited[lastPoint] = true;
-        distanceDijkstra = distanceDijkstra + shortestWay;
-        System.out.println(dijkstraPath);
-        return nextIndex;
-    }
-
-    public static void findDijkstraPath(int startPoint) {
-        int nextPoint = startPoint - 1;
-        for (int i = 0; i < (allPoints.length - 1); i++) {
-            nextPoint = findNextMoveDijkstra(nextPoint);
-        }
-        System.out.println(distanceDijkstra);
-    }
-
     public static void main(String[] args) {
         calcAllDistances();
-//        findShortestPath(1);
-        findDijkstraPath(1);
+        findShortestPath(1);
     }
 }
